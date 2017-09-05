@@ -1,0 +1,245 @@
+R tips:
+--------------------------------------------------------
+Q: A friend recently asked how you list the packages currently loaded into R's workspace, 
+as opposed to listing all available packages which is what library() does. The answer?
+
+A: > (.packages())
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: How to check na's in a dataframe?
+
+A: > colSums(is.na(airquality))
+  Ozone Solar.R    Wind    Temp   Month     Day 
+     37       7       0       0       0       0 
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: How to get the dataframe rows which have na's?
+
+A: new_DF <- DF[rowSums(is.na(DF)) > 0,]
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: How to conver na to 0 in a dataframe?
+
+A: d[is.na(d)] <- 0
+--------------------------------------------------------
+
+
+--------------------------------------------------------
+Q: How to label y axis with percent/dollar/comma sign?
+
+A: p <- ggplot(df, aes(x, y)) + geom_point()
+p + scale_y_continuous(labels = scales::percent)
+p + scale_y_continuous(labels = scales::dollar)
+p + scale_x_continuous(labels = scales::comma)
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: Other ways to deal with na?
+
+A: These generic functions are useful for dealing with NAs in e.g., data frames. 
+na.fail returns the object if it does not contain any missing values, and signals 
+an error otherwise. na.omit returns the object with incomplete cases removed. 
+na.pass returns the object unchanged.
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: programming with dplyr
+
+A: # https://github.com/tidyverse/dplyr/issues/2662
+
+# programming with dplyr
+# group_by "dynamic" variables
+
+library(dplyr)
+
+cols <- c("am","gear")
+grouping_vars <- rlang::parse_quosures(paste(cols, collapse=";"))
+mtcars %>%
+  group_by(!!!grouping_vars) %>%
+  summarise(mean_cyl=mean(cyl))
+
+grouping_vars <- rlang::syms(cols)
+mtcars %>%
+  group_by(!!!grouping_vars) %>%
+  summarise(mean_cyl=mean(cyl))
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: How to set plot margin in ggplot2
+
+plot.margin = unit(c(1,2,1,0.5), "cm") set the margins for bottom, left, top and right
+ 
+https://stackoverflow.com/questions/12109610/r-ggplot-resize-plot-area-window
+ 
+https://www.r-bloggers.com/setting-graph-margins-in-r-using-the-par-function-and-lots-of-cow-milk/
+ 
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: How to deal with long lables
+
+ 
+https://stackoverflow.com/questions/41568411/how-to-maintain-size-of-ggplot-with-long-labels
+
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: Edit ggplotly object then render
+library(shiny)
+library(plotly)
+
+ui <- fluidPage(
+  plotlyOutput("plot")
+  #verbatimTextOutput("event")
+)
+
+server <- function(input, output) {
+  
+  # renderPlotly() also understands ggplot2 objects!
+  output$plot <- renderPlotly({
+    df <- data.frame(x=c(1, 2, 3, 4), y=c(1, 5, 3, 5), group=c('A', 'A', 'B', 'B'))
+    g <- ggplot(data=df, aes(x=x, y=y, colour=group)) + geom_point() +
+      geom_hline(yintercept = 2)
+    
+    
+    
+    #ggplotly(g)
+    
+    p <- plotly_build(g)
+    
+    p$x$data[[3]]$text <- 'zzz: 2'
+    
+    p
+  })
+  
+  # #output$event <- renderPrint({
+  #   d <- event_data("plotly_hover")
+  #   if (is.null(d)) "Hover on a point!" else d
+  #})
+}
+
+shinyApp(ui, server)
+
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: Change colors of bars in ggplot2
+p2 <-
+  ggplot(plotting_df_2, aes(x = Response_Mode__c, y = the_percent,
+                            fill = Response_Summary_Status__c)) +
+  geom_bar(stat = "identity", position = "stack", width = 0.5) +
+  scale_x_discrete(limits = the_new_order) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "", y = "Response Rate (based on all the responded)") +
+  scale_fill_manual(values=c("green", "blue"),
+                    name="",
+                    breaks=c("Completed", "Partial"),
+                    labels=c("Completed", "Partial")) +
+  theme(legend.position = "bottom",
+        legend.title=element_blank())
+
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: How to add a column to a datafrme
+
+library(tibble) # for add_column
+library(dplyr)
+dataset <-
+  data.frame(a = 1:5, b = 2:6, c=3:7) %>%
+  add_column(d = 4:8, .after = 2)
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: How to rotate a table in latex
+
+\usepackage{rotating}
+ 
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Mon Jul 31 14:14:10 2017
+\begin{sidewaystable}[h]
+\centering
+\caption{Mean, Median and Standard Deviation at AU level from Simulations, where
+                  tolerance limit set at MB level and $p=0.04$}
+\label{table04}
+\scalebox{1}{
+\begin{tabular}{ccccccccc}
+  \hline
+Simu. & Nat. REPNS Rate & New Nat. REPNS Rate & Mean & New Mean & Median & New Median & SD & New SD \\
+  \hline
+1 & 0.9533 & 0.9467 & 0.9519 & 0.9469 & 0.9604 & 0.9545 & 0.0427 & 0.0291 \\
+  2 & 0.9533 & 0.9467 & 0.9519 & 0.9466 & 0.9604 & 0.9545 & 0.0427 & 0.0344 \\
+  3 & 0.9533 & 0.9467 & 0.9519 & 0.9467 & 0.9604 & 0.9544 & 0.0427 & 0.0301 \\
+  4 & 0.9533 & 0.9467 & 0.9519 & 0.9466 & 0.9604 & 0.9545 & 0.0427 & 0.0302 \\
+  5 & 0.9533 & 0.9467 & 0.9519 & 0.9468 & 0.9604 & 0.9545 & 0.0427 & 0.0291 \\
+  6 & 0.9533 & 0.9467 & 0.9519 & 0.9466 & 0.9604 & 0.9543 & 0.0427 & 0.0304 \\
+  7 & 0.9533 & 0.9467 & 0.9519 & 0.9467 & 0.9604 & 0.9544 & 0.0427 & 0.0298 \\
+  8 & 0.9533 & 0.9466 & 0.9519 & 0.9467 & 0.9604 & 0.9545 & 0.0427 & 0.0342 \\
+  9 & 0.9533 & 0.9467 & 0.9519 & 0.9467 & 0.9604 & 0.9546 & 0.0427 & 0.0296 \\
+  10 & 0.9533 & 0.9466 & 0.9519 & 0.9468 & 0.9604 & 0.9546 & 0.0427 & 0.0292 \\
+   \hline
+\end{tabular}
+}
+\end{sidewaystable}
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: count-subgroups-in-group-by-with-dplyr
+
+https://stackoverflow.com/questions/43690920/count-subgroups-in-group-by-with-dplyr
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q: Use switch in server.r
+
+library(shiny)
+
+ui <- fluidPage(
+    sidebarPanel(selectInput("data", "Choose a dataset:", 
+                             choices = c("d1", "d2", "d3"))
+  ),
+mainPanel(
+  verbatimTextOutput("summary") 
+  )
+)
+
+
+load("my_d.Rdata")
+
+server <- function(input, output)
+{dataInput <- reactive({switch(input$data,
+                               "d1" = my_d$d1, 
+                               "d2" = my_d$d2,
+                               "d3" = my_d$d3)})
+ output$summary <- renderPrint({
+    data <- dataInput()
+    summary(data)
+})
+  
+}
+
+shinyApp(ui = ui, server = server)
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q:
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q:
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q:
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q:
+--------------------------------------------------------
+
+--------------------------------------------------------
+Q:
+--------------------------------------------------------
